@@ -36,6 +36,7 @@ public class RestaurantController {
 	MenuItemRepository menuItemRepository;
 
 	@GetMapping
+	@PreAuthorize("hasRole('admin')")
 	@RequestMapping("/public/list")
 	//Public API
 	public List<Restaurant> getRestaurants() {
