@@ -6,12 +6,7 @@ import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import dive.dev.entity.Menu;
 import dive.dev.entity.MenuItem;
@@ -36,9 +31,8 @@ public class RestaurantController {
 	MenuItemRepository menuItemRepository;
 
 	@GetMapping
-	@PreAuthorize("hasRole('admin')")
 	@RequestMapping("/public/list")
-	//Public API
+	@PreAuthorize("hasRole('admin')")
 	public List<Restaurant> getRestaurants() {
         return restaurantRepository.findAll();
     }
@@ -59,19 +53,36 @@ public class RestaurantController {
         return restaurantRepository.save(restaurant);
     }
 	
+//	@PostMapping
+//	@RequestMapping("/menu")
+//	// manager can access (suresh)
+//	@PreAuthorize("hasRole('manager')")
+//	public Menu createMenu(Menu menu) {
+//		menuRepository.save(menu);
+//        menu.getMenuItems().forEach(menuItem -> {
+//            menuItem.setMenuId(menu.id);
+//            menuItemRepository.save(menuItem);
+//        });
+//        return menu;
+//    }
 	@PostMapping
 	@RequestMapping("/menu")
-	// manager can access (suresh)
 	@PreAuthorize("hasRole('manager')")
-	public Menu createMenu(Menu menu) {
-		menuRepository.save(menu);
-        menu.getMenuItems().forEach(menuItem -> {
-            menuItem.setMenuId(menu.id);
-            menuItemRepository.save(menuItem);
-        });
-        return menu;
-    }
-	
+	public Menu createMenu(@RequestBody Menu menu) {
+	menuRepository.save(menu);
+
+	// Ensure menuItems is not null
+	if (menu.getMenuItems() != null) {
+		menu.getMenuItems().forEach(menuItem -> {
+			menuItem.setMenuId(menu.getId());
+			menuItemRepository.save(menuItem);
+		});
+	}
+
+	return menu;
+}
+
+
 	@PutMapping
 	@RequestMapping("/menu/item/{itemId}/{price}")
 	// owner can access (amar)
